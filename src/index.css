@@ -1,0 +1,309 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ *  Fonts — Vazirmatn (Persian UI) bundled locally
+ * ------------------------------------------------------------------ */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/fonts/Vazirmatn-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/fonts/Vazirmatn-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/fonts/Vazirmatn-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* ================================================================== *
+ *  DESIGN SYSTEM
+ *  --------------------------------------------------------------
+ *  Quiet, iOS-flavoured chrome: the interface itself is pure black or
+ *  pure white with hairlines; all colour lives in the artwork tiles.
+ *  Surfaces: bg → sheet → surface → surface-2 (each one step lifted).
+ *  Text: fg → fg-2 (secondary) → fg-3 (tertiary).
+ *  One accent: `--art`, the tint of the current cover, used only for
+ *  active states and the playhead — never for decoration.
+ * ================================================================== */
+
+:root {
+  /* — dark (default) — */
+  --bg: #000000;
+  --sheet: #0b0b0c;
+  --surface: #141416;
+  --surface-2: #1c1c1e;
+  --fg: #ffffff;
+  --fg-2: #8e8e93;
+  --fg-3: #636366;
+  --hairline: rgba(255, 255, 255, 0.09);
+  --hairline-2: rgba(255, 255, 255, 0.16);
+  --fill: rgba(120, 120, 128, 0.24);
+  --glass: rgba(28, 28, 30, 0.72);
+  --glass-tab: rgba(24, 24, 26, 0.84);
+  --scrim: rgba(0, 0, 0, 0.5);
+
+  --art: #3a0f3f;          /* midnight drift — the cover of the playing track */
+  --art-ink: #f4e9f7;      /* letter colour on the cover */
+  --accent: #0fb5b5;       /* signal teal — the two live control surfaces (tempo / key) */
+  --accent-glow: rgba(15, 181, 181, 0.6);
+  --accent-soft: rgba(15, 181, 181, 0.14);
+  --key-white: #ffffff;
+  --key-black: #0a0e12;
+  --tint: rgba(196, 120, 210, 0.16);   /* accent wash: active cells, glow */
+  --tint-strong: rgba(196, 120, 210, 0.5);
+
+  /* real device insets — the notch and the home indicator */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
+  --radius-tile: 22%;      /* artwork tiles are softly squared, not round */
+  --shadow-float: 0 10px 34px -12px rgba(0, 0, 0, 0.75);
+  --shadow-sheet: 0 -18px 60px -20px rgba(0, 0, 0, 0.85);
+
+  color-scheme: dark;
+}
+
+[data-theme="day"] {
+  --bg: #f2f2f7;
+  --sheet: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f2f2f7;
+  --fg: #000000;
+  --fg-2: #8e8e93;
+  --fg-3: #aeaeb2;
+  --hairline: rgba(60, 60, 67, 0.13);
+  --hairline-2: rgba(60, 60, 67, 0.22);
+  --fill: rgba(120, 120, 128, 0.12);
+  --glass: rgba(255, 255, 255, 0.76);
+  --glass-tab: rgba(255, 255, 255, 0.86);
+  --scrim: rgba(0, 0, 0, 0.28);
+
+  --art: #3a0f3f;
+  --art-ink: #f6ecf9;
+  --accent: #0fb5b5;
+  --accent-glow: rgba(15, 181, 181, 0.45);
+  --accent-soft: rgba(15, 181, 181, 0.12);
+  --key-white: #ffffff;
+  --key-black: #07090a;
+  --tint: rgba(58, 15, 63, 0.09);
+  --tint-strong: rgba(58, 15, 63, 0.42);
+
+  --shadow-float: 0 10px 30px -14px rgba(0, 0, 0, 0.28);
+  --shadow-sheet: 0 -18px 60px -26px rgba(0, 0, 0, 0.35);
+
+  color-scheme: light;
+}
+
+/* beUI components speak shadcn tokens — point them at the system above. */
+@theme inline {
+  --color-background: var(--sheet);
+  --color-foreground: var(--fg);
+  --color-card: var(--surface-2);
+  --color-card-foreground: var(--fg);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--fg);
+  --color-muted: var(--fill);
+  --color-muted-foreground: var(--fg-2);
+  --color-primary: var(--fg);
+  --color-primary-foreground: var(--bg);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--fg);
+  --color-accent: var(--fill);
+  --color-accent-foreground: var(--fg);
+  --color-border: var(--hairline);
+  --color-input: var(--hairline-2);
+  --color-ring: var(--hairline-2);
+
+  --font-sans: "Vazirmatn", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --font-mono: "Vazirmatn", ui-monospace, "SF Mono", monospace;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Appica UI — token bridge
+ *  The slider component ships its own Tailwind classes; these are the
+ *  four tokens it asks for, pointed at our palette: a quiet grey rail,
+ *  the teal signal ink and an inverting value pill.
+ * ------------------------------------------------------------------ */
+@theme inline {
+  --color-background-strong: var(--fill);
+  --color-background-inverse: var(--fg);
+  --color-foreground-inverse: var(--bg);
+  --radius-4xs: 6px;
+  --opacity-disabled: 0.55;
+}
+
+/* Only the slider's own source is scanned — not the whole component library. */
+@source "../node_modules/@appica/ui-react/dist/components/slider/slider.js";
+
+/* ------------------------------------------------------------------ *
+ *  Base
+ * ------------------------------------------------------------------ */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--tint);
+}
+
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline-2) transparent;
+}
+.scroll-area::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background: var(--hairline-2);
+  border-radius: 999px;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Materials
+ * ------------------------------------------------------------------ */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 0.5px solid var(--hairline);
+}
+
+.glass-tab {
+  background: var(--glass-tab);
+  backdrop-filter: blur(26px) saturate(170%);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
+  border: 0.5px solid var(--hairline);
+}
+
+.sheet-surface {
+  background: var(--sheet);
+  border-top: 0.5px solid var(--hairline-2);
+  box-shadow: var(--shadow-sheet);
+}
+
+/* iOS list: full-bleed rows, hairline separator inset to the text column. */
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 76px;   /* inset past the 48px tile + gap (RTL) */
+  left: 0;
+  height: 0.5px;
+  background: var(--hairline);
+}
+.row:active {
+  background: var(--fill);
+}
+
+/* artwork tile — the only place colour is allowed to live */
+.tile {
+  border-radius: var(--radius-tile);
+  display: grid;
+  place-items: center;
+  color: var(--art-ink);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  flex: none;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Motion
+ * ------------------------------------------------------------------ */
+@keyframes pulse-ring {
+  0% { opacity: 0.5; transform: scale(0.94); }
+  70% { opacity: 0; transform: scale(1.3); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+.pulse-ring { animation: pulse-ring 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+
+/* the key readout gives a little nod every time the key changes */
+@keyframes key-bump {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+.key-bump { animation: key-bump 180ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.spin-slow { animation: spin-slow 18s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring, .spin-slow { animation: none !important; }
+}
+
+/* Short viewports */
+@media (max-height: 700px) {
+  .np-compact { padding: 8px 10px !important; gap: 10px !important; }
+  .np-compact .np-art { width: 42px !important; height: 42px !important; }
+  .np-compact .np-meta { display: none !important; }
+  .viz-strip { display: none !important; }
+}
+
+/* ------------------------------------------------------------------ *
+ *  Mixer drawer — Appica slider, tuned to this app
+ *  Grey rail, teal ink, an inverting value pill. The control keeps its
+ *  own 6px rail but gains a ~40px drag band so a thumb is finger-sized.
+ * ------------------------------------------------------------------ */
+.mix-slider [data-slot="slider-indicator"] {
+  background-color: var(--accent);
+}
+.mix-slider [data-slot="slider-thumb-visual"] {
+  border-color: var(--accent);
+}
+.mix-slider [data-slot="slider-control"] {
+  /* 25 + 6 (the rail) + 25 = one 56px row: rail-to-rail spacing is the same
+     everywhere, and the value pill (17px + 4px margin) still fits inside its
+     own row, never touching the rail above it. */
+  padding-block: 25px;
+}
+/* The pill is centred on its thumb — re-asserted so no variant or RTL rule
+   can nudge it. Tabular digits keep the number dead-centre inside the pill. */
+.mix-slider [data-slot="slider-tooltip-wrapper"][data-orientation="horizontal"] {
+  left: 50%;
+  translate: -50% 0;
+}
+.mix-slider [data-slot="slider-tooltip"] {
+  font-variant-numeric: tabular-nums;
+}
