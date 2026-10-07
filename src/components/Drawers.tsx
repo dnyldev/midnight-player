@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
 import { motion } from "motion/react";
-import { Drum, Guitar, Mic, Piano, Waves, type LucideIcon } from "lucide-react";
+import { Drum, Guitar, Mic, MoreHorizontal, Piano, Waves, type LucideIcon } from "lucide-react";
 import { Slider } from "@appica/ui-react/slider";
 import { BottomSheet } from "@/components/beui/bottom-sheet";
 import { NumberTicker } from "@/components/beui/number-ticker";
@@ -203,16 +203,41 @@ export function TempoSheet({
   const mask = "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)";
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} snapPoints={["auto"]} title="تمپو" description="خط‌کش را بکش تا سرعت پخش عوض شود">
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      snapPoints={["auto"]}
+      title="Tempo"
+      /* the mirror of the title: same line, right end */
+      headerAction={
+        <motion.button
+          type="button"
+          onClick={() => settle(SONG.bpm)}
+          whileTap={{ scale: 0.95 }}
+          transition={SPRING_PRESS}
+          className="rounded-full px-3 py-1 text-[12px] transition-opacity"
+          style={{ color: "var(--accent)", opacity: shown === SONG.bpm ? 0.32 : 1, pointerEvents: shown === SONG.bpm ? "none" : "auto" }}
+        >
+          {shown === SONG.bpm ? "Original tempo" : `Back to ${SONG.bpm}`}
+        </motion.button>
+      }
+    >
       <div className="select-none px-1 pt-2" dir="ltr" style={{ paddingBottom: "calc(var(--safe-b) + 4px)" }}>
-        {/* big readout */}
+        {/* big readout — the ticker's digits are absolutely placed, so the ticker
+            itself has no text baseline and flex was aligning "BPM" to its bottom
+            edge. This zero-width strut carries the same size/leading as the digits,
+            so the label rides the digits' real baseline; the ticker is start-aligned
+            inside it so the number does not move. */}
         <div className="flex items-baseline justify-center gap-[10px] pt-6">
-          <NumberTicker
-            value={shown}
-            startOnView={false}
-            duration={0.35}
-            className="text-[92px] font-extrabold leading-[0.9] tracking-[-0.04em] tabular-nums text-[var(--fg)]"
-          />
+          <span className="inline-flex items-start">
+            <span aria-hidden className="text-[92px] leading-[1.1]">{"\u200b"}</span>
+            <NumberTicker
+              value={shown}
+              startOnView={false}
+              duration={0.35}
+              className="text-[92px] font-extrabold leading-[0.9] tracking-[-0.04em] tabular-nums text-[var(--fg)]"
+            />
+          </span>
           <span className="mb-[14px] text-[13px] font-semibold tracking-[0.18em] text-[var(--fg-2)]">BPM</span>
         </div>
 
@@ -238,11 +263,11 @@ export function TempoSheet({
 
           <div
             role="slider"
-            aria-label="تمپو"
+            aria-label="Tempo"
             aria-valuemin={T_MIN}
             aria-valuemax={T_MAX}
             aria-valuenow={shown}
-            aria-valuetext={`${shown} ضربه بر دقیقه`}
+            aria-valuetext={`${shown} beats per minute`}
             tabIndex={0}
             onKeyDown={(e) => {
               const dir = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
@@ -288,20 +313,6 @@ export function TempoSheet({
           </div>
         </div>
 
-        {/* original tempo */}
-        <div className="flex h-8 items-center justify-center pb-2">
-          <motion.button
-            type="button"
-            dir="rtl"
-            onClick={() => settle(SONG.bpm)}
-            whileTap={{ scale: 0.95 }}
-            transition={SPRING_PRESS}
-            className="rounded-full px-3 py-1 text-[12px] transition-opacity"
-            style={{ color: "var(--accent)", opacity: shown === SONG.bpm ? 0.32 : 1, pointerEvents: shown === SONG.bpm ? "none" : "auto" }}
-          >
-            {shown === SONG.bpm ? "تمپوی اصلی" : `بازگشت به ${SONG.bpm}`}
-          </motion.button>
-        </div>
       </div>
     </BottomSheet>
   );
@@ -334,8 +345,6 @@ const BLACK_KEYS = [
 const NAMES_SHARP = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
 const NAMES_FLAT = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
 
-const FA_DIGITS = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
-const fa = (n: number) => String(Math.abs(n)).replace(/\d/g, (d) => FA_DIGITS[+d]);
 
 const KEY_UNIT = "(100% - 36px) / 7";
 const HOLD_DELAY = 300;
@@ -402,18 +411,17 @@ export function KeySheet({
   }, [open, clearHold]);
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} snapPoints={["auto"]} title="گام" description="ریشه‌ی گام را عوض کن — آکوردها و صدای پخش هم ترنسپوز می‌شوند">
+    <BottomSheet open={open} onOpenChange={onOpenChange} snapPoints={["auto"]} title="Key">
       <div className="select-none px-1 pt-1" dir="ltr" style={{ paddingBottom: "calc(var(--safe-b) + 8px)" }}>
         {/* reset row */}
         <div className="flex h-8 items-center justify-end pb-1">
           <button
             type="button"
-            dir="rtl"
             onClick={() => onSemitones(0)}
             className="text-[11px] font-bold tracking-[0.18em] transition-opacity active:scale-95"
             style={{ color: "var(--accent)", opacity: original ? 0.32 : 1, pointerEvents: original ? "none" : "auto" }}
           >
-            بازنشانی
+            Reset
           </button>
         </div>
 
@@ -422,8 +430,8 @@ export function KeySheet({
           <div key={bump} className="key-bump font-extrabold leading-[0.9] tracking-[-0.02em]" style={{ fontSize: "clamp(84px, 24vw, 120px)", color: "var(--accent)" }}>
             {name}
           </div>
-          <div className="mt-3 text-center text-[12px] font-bold tracking-[0.16em] text-[var(--fg-2)]" dir="rtl">
-            {original ? "گام اصلی" : `${fa(delta)} نیم‌پرده ${delta > 0 ? "بالاتر" : "پایین‌تر"}`}
+          <div className="mt-3 text-center text-[12px] font-bold tracking-[0.16em] text-[var(--fg-2)]">
+            {original ? "Original key" : `${Math.abs(delta)} ${Math.abs(delta) === 1 ? "semitone" : "semitones"} ${delta > 0 ? "up" : "down"}`}
           </div>
         </div>
 
@@ -436,7 +444,7 @@ export function KeySheet({
                 <motion.button
                   key={k.pc}
                   type="button"
-                  aria-label={`گام ${k.name}`}
+                  aria-label={`Key ${k.name}`}
                   aria-pressed={active}
                   onPointerDown={(e) => {
                     e.preventDefault();
@@ -463,7 +471,7 @@ export function KeySheet({
                 <motion.button
                   key={k.pc}
                   type="button"
-                  aria-label={`گام ${(flat ? NAMES_FLAT : NAMES_SHARP)[k.pc]}`}
+                  aria-label={`Key ${(flat ? NAMES_FLAT : NAMES_SHARP)[k.pc]}`}
                   aria-pressed={active}
                   onPointerDown={(e) => {
                     e.preventDefault();
@@ -493,7 +501,7 @@ export function KeySheet({
             <motion.button
               key={dir}
               type="button"
-              aria-label={dir === -1 ? "یک نیم‌پرده بم‌تر" : "یک نیم‌پرده تیزتر"}
+              aria-label={dir === -1 ? "One semitone down" : "One semitone up"}
               onPointerDown={(e) => {
                 e.preventDefault();
                 startHold(dir);
@@ -531,7 +539,7 @@ const MIX_ICONS: Record<StemId, LucideIcon> = {
 };
 
 /** Part of the session template, not of this track — hence a dead row. */
-const MIX_IDLE = { Icon: Piano, label: "پیانو", level: 45 } as const;
+const MIX_IDLE = { Icon: Piano, label: "Piano", level: 45 } as const;
 
 export function MixerSheet({
   open,
@@ -545,7 +553,7 @@ export function MixerSheet({
   onStemLevel: (id: StemId, level: number) => void;
 }) {
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} snapPoints={["auto"]} ariaLabel="میکسر">
+    <BottomSheet open={open} onOpenChange={onOpenChange} snapPoints={["auto"]} ariaLabel="Mixer">
       {/* Air above the first rail matches the air below the last one (the extra
           safe-area inset rides on the bottom edge, where the home bar lives). */}
       <div className="select-none px-2 pt-1" dir="ltr" style={{ paddingBottom: "calc(var(--safe-b) + 14px)" }}>
@@ -554,7 +562,7 @@ export function MixerSheet({
             key={stem.id}
             index={index}
             Icon={MIX_ICONS[stem.id]}
-            label={stem.fa}
+            label={stem.label}
             value={Math.round((mix[stem.id]?.level ?? 0) * 100)}
             onValue={(next) => onStemLevel(stem.id, next / 100)}
           />
@@ -605,6 +613,11 @@ function MixRow({
         disabled={disabled}
         thumbAriaLabel={label}
       />
+      {/* the row's other end: the same 24px column, a three-dot mark — the rail
+          gives up exactly this column's width */}
+      <span className="grid size-6 shrink-0 place-items-center text-[var(--fg-2)]">
+        <MoreHorizontal className="size-[20px]" strokeWidth={1.6} aria-hidden />
+      </span>
     </motion.div>
   );
 }

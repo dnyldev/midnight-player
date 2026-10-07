@@ -1,7 +1,5 @@
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { Maximize2, Minimize2 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/beui/tabs";
 import { SPRING_GLIDE } from "@/lib/ease";
 import {
   BARS,
@@ -14,6 +12,7 @@ import {
   transposeChord,
 } from "@/data/song";
 import { cn } from "@/lib/utils";
+import { ChordStrip } from "@/components/ChordStrip";
 
 export type RibbonMode = "follow" | "map";
 
@@ -192,106 +191,16 @@ export function Ribbon({ beat, playing, semitones, mode, compact, onModeChange, 
   const currentChord = transposeChord(chordAtBeat(safeBeat), semitones);
   const nextChange = useMemo(() => CHANGES.find((c) => c.beat > safeBeat + 0.02), [safeBeat]);
   const nextChord = nextChange ? transposeChord(nextChange.chord, semitones) : "—";
-  const currentBarNumber = Math.min(TOTAL_BARS, Math.floor(safeBeat / 4) + 1);
-  const section = (BARS[Math.min(TOTAL_BARS - 1, Math.floor(safeBeat / 4))] ?? BARS[0]).section;
   const beatInBar = Math.floor(safeBeat) % 4;
   const progress = safeBeat / TOTAL_BEATS;
 
   return (
-    <section className={compact ? "flex flex-1 flex-col gap-2" : "flex flex-1 flex-col gap-3"} style={{ minHeight: compact ? cellW + 20 : 126 }}>
-      <header className="flex items-center justify-between gap-3 px-1">
-        <div className="flex items-baseline gap-2">
-          <span className="text-[12px] text-[var(--fg-2)]">نوار آکورد</span>
-          <span className="text-[12px] text-[var(--fg-3)]">
-            <span className="text-[var(--fg-2)]">{section}</span>
-            <span className="mx-1.5">·</span>
-            <span className="tabular-nums">{currentBarNumber}</span>
-            <span>/{TOTAL_BARS}</span>
-          </span>
-        </div>
-
-        <Tabs variant="segment" value={mode} onValueChange={(v) => onModeChange(v as RibbonMode)} className="shrink-0">
-          <TabsList className="border border-[var(--hairline)]">
-            <TabsTrigger value="follow" className="h-11 gap-1 px-3 text-[11px]">
-              <Minimize2 className="size-3" />
-              پیشرو
-            </TabsTrigger>
-            <TabsTrigger value="map" className="h-11 gap-1 px-3 text-[11px]">
-              <Maximize2 className="size-3" />
-              نقشهی آهنگ
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </header>
-
-      <div
-        className="relative overflow-hidden rounded-2xl border border-[var(--hairline)]"
-        style={compact ? { height: cellW + 12 } : { minHeight: 102, maxHeight: "42vh", flex: "1 1 auto" }}
-      >
-        {/* section wash — the tiniest hint that a section is running */}
-        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-          <span className="absolute inset-x-0 top-0 h-8" style={{ background: "linear-gradient(to bottom, var(--fill), transparent)" }} />
-        </div>
-        {mode === "follow" ? (
-          <>
-            <div ref={viewportRef} className="relative h-full overflow-hidden" dir="ltr">
-              <motion.div style={{ x: strip, width: stripWidth }} className="absolute top-1/2 -translate-y-1/2 will-change-transform">
-                <ChordGrid cellW={cellW} chordFontSize={chordFontSize} semitones={semitones} onSeek={onSeek} />
-              </motion.div>
-
-              {/* active cell bracket */}
-              <motion.div
-                aria-hidden
-                style={{ x: activeCellX, width: cellW, height: cellW, top: "50%", marginTop: -cellW / 2 }}
-                className="pointer-events-none absolute left-0 rounded-[14px] ring-[1.5px] ring-[var(--fg)]"
-              />
-
-              {/* playhead */}
-              <motion.div aria-hidden style={{ x: playheadX }} className="pointer-events-none absolute inset-y-0 left-0">
-                <div className="relative h-full w-px" style={{ background: "linear-gradient(to bottom, transparent, var(--fg) 16%, var(--fg) 84%, transparent)", opacity: 0.9 }}>
-                  <span className="absolute -left-[3px] top-1/2 size-[7px] -translate-y-1/2 rounded-full" style={{ background: "var(--fg)" }} />
-                  {playing ? <span className="pulse-ring absolute -left-[10px] top-1/2 size-[21px] -translate-y-1/2 rounded-full border" style={{ borderColor: "var(--fg)", opacity: 0.4 }} /> : null}
-                </div>
-              </motion.div>
-
-              {/* edge fades */}
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-10" style={{ background: "linear-gradient(to right, var(--bg), transparent)" }} />
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-14" style={{ background: "linear-gradient(to left, var(--bg), transparent)" }} />
-            </div>
-            {compact ? null : (
-              <p className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] text-[var(--fg-3)]">
-                روی هر خانه بزن تا از همان ضرب پخش شود
-              </p>
-            )}
-          </>
-        ) : (
-          <SongMap beat={beat} onSeek={onSeek} semitones={semitones} />
-        )}
-      </div>
-
-      {/* readout — the panel already spells the chord out, so while it is open
-          this collapses to one calm line and hands the height to the panel. */}
-      <footer className={cn("flex items-center justify-between gap-3 px-1", compact && "py-0")}>
-        <div className="flex items-center gap-3">
-          <motion.div
-            key={currentChord}
-            initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className={cn("font-bold text-[var(--fg)]", compact ? "text-[20px]" : "text-[28px]")}
-          >
-            {currentChord}
-          </motion.div>
-          {compact ? null : (
-            <div className="flex flex-col">
-              <span className="text-[11px] text-[var(--fg-3)]">بعدی</span>
-              <span className="text-[13px] text-[var(--fg-2)]">{nextChord}</span>
-            </div>
-          )}
-        </div>
-
-        {compact ? null : (
-        <div className="flex items-center gap-4">
+    <section className={cn("flex min-w-0 flex-1 flex-col", compact ? "gap-2" : "gap-3")} style={{ minHeight: compact ? cellW + 20 : 126 }}>
+      {/* meter + beat dots — moved up to sit between the header and the strip,
+          left-aligned, the meter to the left of the dots */}
+      {compact ? null : (
+        <div className="flex items-center gap-4 px-1">
+          <span className="text-[11px] tabular-nums text-[var(--fg-3)]">{SONG.timeSignature}/4</span>
           <div className="flex items-center gap-1.5">
             {[0, 1, 2, 3].map((i) => (
               <motion.span
@@ -306,10 +215,27 @@ export function Ribbon({ beat, playing, semitones, mode, compact, onModeChange, 
               />
             ))}
           </div>
-          <span className="text-[11px] tabular-nums text-[var(--fg-3)]">{Math.round(progress * 100)}%</span>
         </div>
-        )}
-      </footer>
+      )}
+
+      {mode === "follow" ? (
+        /* the strip from the lab (ChordStrip.tsx) replaces the old card: cells
+           sit straight on the sheet, no border, no wash, no bracket. */
+        <div ref={viewportRef} className="relative flex min-h-[56px] min-w-0 w-full flex-1 items-center" dir="ltr">
+          <ChordStrip beat={safeBeat} semitones={semitones} onSeek={onSeek} />
+        </div>
+      ) : (
+        <div
+          className="relative overflow-hidden rounded-2xl border border-[var(--hairline)]"
+          style={compact ? { height: cellW + 12 } : { minHeight: 102, maxHeight: "42vh", flex: "1 1 auto" }}
+        >
+          {/* section wash — the tiniest hint that a section is running */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <span className="absolute inset-x-0 top-0 h-8" style={{ background: "linear-gradient(to bottom, var(--fill), transparent)" }} />
+          </div>
+          <SongMap beat={beat} onSeek={onSeek} semitones={semitones} />
+        </div>
+      )}
     </section>
   );
 }
@@ -339,7 +265,7 @@ function SongMap({ beat, onSeek, semitones }: { beat: number; onSeek: (beat: num
   }, []);
 
   return (
-    <div className="flex h-full flex-col justify-center gap-4 p-4" dir="rtl">
+    <div className="flex h-full flex-col justify-center gap-4 p-4">
       <div className="relative h-8" dir="ltr">
         <div className="absolute inset-0 flex gap-1" dir="ltr">
           {sections.map((s) => {

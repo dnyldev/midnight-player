@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { FastForward, LayoutGrid, ListMusic, Pause, Play, Rewind, SlidersHorizontal } from "lucide-react";
+import { FastForward, Pause, Play, Rewind } from "lucide-react";
 import { NumberTicker } from "@/components/beui/number-ticker";
 import { SPRING_PRESS } from "@/lib/ease";
 import { formatTime } from "@/hooks/useTransport";
@@ -10,26 +10,15 @@ export type PanelId = "chords" | "lyrics";
 /** Everything the dock row can act on — panels stack in the sheet, the mixer is its own drawer. */
 export type DockId = PanelId | "mixer";
 
-const PANELS: { id: DockId; label: string; Icon: typeof LayoutGrid }[] = [
-  { id: "chords", label: "دیاگرام آکوردها", Icon: LayoutGrid },
-  { id: "lyrics", label: "متن آهنگ", Icon: ListMusic },
-  { id: "mixer", label: "میکسر", Icon: SlidersHorizontal },
-];
-
 interface TransportProps {
   playing: boolean;
   beat: number;
   bpm: number;
   semitones: number;
   secPerBeat: number;
-  /** Every open panel — the toggles are independent, so this is a set. */
-  panels: PanelId[];
-  /** The mixer lives in its own bottom drawer, matching tempo and key. */
-  mixerOpen: boolean;
   onToggle: () => void;
   onSeek: (beat: number) => void;
   onSkip: (seconds: number) => void;
-  onPanel: (panel: DockId) => void;
   onOpenTempo: () => void;
   onOpenKey: () => void;
 }
@@ -40,12 +29,9 @@ export function Transport({
   bpm,
   semitones,
   secPerBeat,
-  panels,
-  mixerOpen,
   onToggle,
   onSeek,
   onSkip,
-  onPanel,
   onOpenTempo,
   onOpenKey,
 }: TransportProps) {
@@ -80,7 +66,7 @@ export function Transport({
         <div
           ref={trackRef}
           role="slider"
-          aria-label="جای پخش"
+          aria-label="Playhead"
           aria-valuemin={0}
           aria-valuemax={Math.round(TOTAL_BEATS)}
           aria-valuenow={Math.round(playedBeat)}
@@ -122,45 +108,23 @@ export function Transport({
         <span className="w-9 shrink-0 text-right text-[12px] tabular-nums text-[var(--fg-2)]">{formatTime(TOTAL_BEATS * secPerBeat)}</span>
       </div>
 
-      {/* panel toggles — independent switches, not tabs: any combination is legal */}
-      <div className="flex items-center justify-center">
-        <div className="flex items-center gap-0.5 rounded-full p-0.5" style={{ background: "var(--fill)" }}>
-          {PANELS.map(({ id, label, Icon }) => {
-            const active = id === "mixer" ? mixerOpen : panels.includes(id);
-            return (
-              <motion.button
-                key={id}
-                type="button"
-                aria-label={label}
-                aria-pressed={active}
-                onClick={() => onPanel(id)}
-                whileTap={{ scale: 0.9 }}
-                transition={SPRING_PRESS}
-                className="grid size-11 place-items-center rounded-full transition-colors"
-                style={{ background: active ? "var(--fg)" : "transparent", color: active ? "var(--bg)" : "var(--fg-2)" }}
-              >
-                <Icon className="size-[18px]" />
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
+      {/* panel toggles now live in the header — the transport row is scrubber + transport only */}
 
       {/* transport — the chips take the corners, the transport keeps the middle */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 pt-0.5" dir="ltr">
         <CornerStat
           className="justify-self-start"
           align="start"
-          aria-label="تمپو"
+          aria-label="Tempo"
           value={<NumberTicker value={bpm} startOnView={false} duration={0.5} className="text-[24px] font-semibold leading-none tracking-[-0.01em] tabular-nums" />}
           label="BPM"
           onClick={onOpenTempo}
         />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <motion.button
             type="button"
-            aria-label="عقب ۵ ثانیه"
+            aria-label="Back 5 seconds"
             onClick={() => onSkip(-5)}
             whileTap={{ scale: 0.9 }}
             transition={SPRING_PRESS}
@@ -171,7 +135,7 @@ export function Transport({
 
           <motion.button
             type="button"
-            aria-label={playing ? "توقف" : "پخش"}
+            aria-label={playing ? "Pause" : "Play"}
             onClick={onToggle}
             whileTap={{ scale: 0.92 }}
             transition={SPRING_PRESS}
@@ -183,7 +147,7 @@ export function Transport({
 
           <motion.button
             type="button"
-            aria-label="جلو ۵ ثانیه"
+            aria-label="Forward 5 seconds"
             onClick={() => onSkip(5)}
             whileTap={{ scale: 0.9 }}
             transition={SPRING_PRESS}
@@ -196,7 +160,7 @@ export function Transport({
         <CornerStat
           className="justify-self-end"
           align="end"
-          aria-label="گام"
+          aria-label="Key"
           value={<span className="text-[24px] font-semibold leading-none tracking-[-0.01em]">{transposeChord("A", semitones)}m</span>}
           label="KEY"
           onClick={onOpenKey}
@@ -226,10 +190,10 @@ function CornerStat({
       onClick={onClick}
       whileTap={{ scale: 0.94 }}
       transition={SPRING_PRESS}
-      className={`flex min-h-11 flex-col justify-center gap-2 ${align === "start" ? "items-start pl-6" : "items-end pr-6"} ${className ?? ""}`}
+      className={`flex min-h-11 flex-col justify-center gap-2 ${align === "start" ? "items-start" : "items-end"} ${className ?? ""}`}
       {...props}
     >
-      <span className="text-[24px] font-semibold leading-none tracking-[-0.01em] tabular-nums text-[var(--fg)]">{value}</span>
+      <span className="flex h-[1.1em] items-center text-[24px] font-semibold leading-none tracking-[-0.01em] tabular-nums text-[var(--fg)]">{value}</span>
       <span className="text-[13px] font-medium uppercase leading-none tracking-[0.06em] text-[var(--fg-2)]">{label}</span>
     </motion.button>
   );

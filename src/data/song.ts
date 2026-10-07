@@ -112,28 +112,27 @@ export const CHANGES = BARS.flatMap((bar) =>
 );
 
 /* ------------------------------------------------------------------ *
- *  Lyrics — English line + Persian translation, anchored to a beat
+ *  Lyrics — one line per phrase, anchored to a beat
  * ------------------------------------------------------------------ */
 
 interface LyricLine {
   beat: number;
   text: string;
-  fa: string;
 }
 
 export const LYRICS: LyricLine[] = [
-  { beat: 8, text: "Midnight city, lights are low", fa: "شهر نیمه‌شب، چراغ‌ها کم‌نور" },
-  { beat: 16, text: "Neon veil in afterglow", fa: "هاله‌ای نئونی در پس‌درخشش" },
-  { beat: 24, text: "Whispers echo down the street", fa: "نجواها در خیابان می‌پیچند" },
-  { beat: 32, text: "Shadows dancing to the beat", fa: "سایه‌ها با ضرب‌آهنگ می‌رقصند" },
-  { beat: 40, text: "Hold me close in satin dreams", fa: "در رؤیاهای اطلسی نگهَم دار" },
-  { beat: 48, text: "Silver rivers, quiet streams", fa: "رودهای نقره‌ای، جویبارهای آرام" },
-  { beat: 56, text: "Your perfume, a gentle ghost", fa: "عطر تو، شبحی مهربان" },
-  { beat: 64, text: "In this night we need the most", fa: "در این شب، بیشترین نیازِ ما" },
-  { beat: 72, text: "Society of midnight hearts", fa: "انجمنِ دل‌های نیمه‌شب" },
-  { beat: 80, text: "Where every end is where it starts", fa: "آنجا که هر پایان، آغاز است" },
-  { beat: 88, text: "Every heartbeat keeps the time", fa: "هر تپش قلب، زمان را نگه می‌دارد" },
-  { beat: 96, text: "You and I, a stolen rhyme", fa: "من و تو، قافیه‌ای دزدیده" },
+  { beat: 8, text: "Midnight city, lights are low" },
+  { beat: 16, text: "Neon veil in afterglow" },
+  { beat: 24, text: "Whispers echo down the street" },
+  { beat: 32, text: "Shadows dancing to the beat" },
+  { beat: 40, text: "Hold me close in satin dreams" },
+  { beat: 48, text: "Silver rivers, quiet streams" },
+  { beat: 56, text: "Your perfume, a gentle ghost" },
+  { beat: 64, text: "In this night we need the most" },
+  { beat: 72, text: "Society of midnight hearts" },
+  { beat: 80, text: "Where every end is where it starts" },
+  { beat: 88, text: "Every heartbeat keeps the time" },
+  { beat: 96, text: "You and I, a stolen rhyme" },
 ];
 
 /** Index of the line that owns a beat (intro/outro return -1). */
@@ -149,11 +148,11 @@ export function lyricIndexAtBeat(beat: number): number {
 
 export type StemId = "vocals" | "drums" | "bass" | "other";
 
-export const STEMS: { id: StemId; label: string; fa: string; icon: string; defaultLevel: number }[] = [
-  { id: "vocals", label: "Vocals", fa: "وکال", icon: "mic", defaultLevel: 92 },
-  { id: "drums", label: "Drums", fa: "درامز", icon: "drum", defaultLevel: 78 },
-  { id: "bass", label: "Bass", fa: "باس", icon: "guitar", defaultLevel: 84 },
-  { id: "other", label: "Other", fa: "پد و اتمسفر", icon: "waves", defaultLevel: 70 },
+export const STEMS: { id: StemId; label: string; icon: string; defaultLevel: number }[] = [
+  { id: "vocals", label: "Vocals", icon: "mic", defaultLevel: 92 },
+  { id: "drums", label: "Drums", icon: "drum", defaultLevel: 78 },
+  { id: "bass", label: "Bass", icon: "guitar", defaultLevel: 84 },
+  { id: "other", label: "Other", icon: "waves", defaultLevel: 70 },
 ];
 
 /** Strumming pattern for one bar — 8 eighth-note slots: D / U / · */

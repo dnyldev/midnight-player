@@ -16,10 +16,10 @@ interface LibraryProps {
 }
 
 const TABS: { id: DockId | "home"; label: string; Icon: typeof House }[] = [
-  { id: "home", label: "کتابخانه", Icon: House },
-  { id: "chords", label: "آکوردها", Icon: LayoutGrid },
-  { id: "lyrics", label: "متن", Icon: ListMusic },
-  { id: "mixer", label: "میکسر", Icon: SlidersHorizontal },
+  { id: "home", label: "Library", Icon: House },
+  { id: "chords", label: "Chords", Icon: LayoutGrid },
+  { id: "lyrics", label: "Lyrics", Icon: ListMusic },
+  { id: "mixer", label: "Mixer", Icon: SlidersHorizontal },
 ];
 
 /**
@@ -36,14 +36,14 @@ export function Library({ playing, sheetOpen, onToggle, onOpenPanel, onClose }: 
     <div className="fixed inset-0 flex flex-col" style={{ background: "var(--bg)" }}>
       <header className="flex items-start justify-between px-3 pb-2" style={{ paddingTop: "calc(var(--safe-t) + 18px)" }}>
         <div>
-          <h1 className="text-[30px] font-bold leading-none tracking-[-0.02em]">کتابخانه</h1>
-          <p className="mt-2 text-[15px] text-[var(--fg-2)]">{TRACKS.length} ترک</p>
+          <h1 className="text-[30px] font-bold leading-none tracking-[-0.02em]">Library</h1>
+          <p className="mt-2 text-[15px] text-[var(--fg-2)]">{TRACKS.length} tracks</p>
         </div>
         <div className="-mr-2.5 flex items-center gap-2 pt-0.5 text-[var(--fg-2)]">
-          <button type="button" aria-label="افزودن" className="grid size-11 place-items-center rounded-full transition-colors hover:text-[var(--fg)]">
+          <button type="button" aria-label="Add" className="grid size-11 place-items-center rounded-full transition-colors hover:text-[var(--fg)]">
             <Plus className="size-[22px]" strokeWidth={2.2} />
           </button>
-          <button type="button" aria-label="جست‌وجو" className="grid size-11 place-items-center rounded-full transition-colors hover:text-[var(--fg)]">
+          <button type="button" aria-label="Search" className="grid size-11 place-items-center rounded-full transition-colors hover:text-[var(--fg)]">
             <Search className="size-[21px]" strokeWidth={2.2} />
           </button>
         </div>
@@ -68,14 +68,14 @@ export function Library({ playing, sheetOpen, onToggle, onOpenPanel, onClose }: 
         <span className="tile size-9 text-[15px]" style={{ background: NOW_PLAYING.color }}>
           {NOW_PLAYING.letter}
         </span>
-        <button type="button" onClick={() => onOpenPanel("chords")} className="min-h-11 min-w-0 flex-1 text-right">
+        <button type="button" onClick={() => onOpenPanel("chords")} className="min-h-11 min-w-0 flex-1 text-left">
           <span className="block truncate text-[15px] font-medium leading-tight">{NOW_PLAYING.title}</span>
           <span className="block truncate text-[12px] leading-tight text-[var(--fg-2)]">{NOW_PLAYING.artist}</span>
         </button>
 
         <motion.button
           type="button"
-          aria-label={playing ? "توقف" : "پخش"}
+          aria-label={playing ? "Pause" : "Play"}
           onClick={onToggle}
           whileTap={{ scale: 0.9 }}
           transition={SPRING_PRESS}
@@ -87,7 +87,7 @@ export function Library({ playing, sheetOpen, onToggle, onOpenPanel, onClose }: 
 
         <motion.button
           type="button"
-          aria-label="باز کردن پلیر"
+          aria-label="Open player"
           onClick={() => onOpenPanel("chords")}
           whileTap={{ scale: 0.9 }}
           transition={SPRING_PRESS}

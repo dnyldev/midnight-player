@@ -27,6 +27,8 @@ export interface BottomSheetProps {
   defaultSnap?: number;
   title?: string;
   description?: string;
+  /** Rendered at the right end of the title row (the mirror of the title). */
+  headerAction?: ReactNode;
   /** Accessible name for drawers that carry no visible heading. */
   ariaLabel?: string;
   /** extra classes for the scrollable body (the player drops its bottom padding) */
@@ -44,6 +46,7 @@ export function BottomSheet({
   defaultSnap = 0,
   title,
   description,
+  headerAction,
   ariaLabel,
   bodyClassName,
   children,
@@ -221,24 +224,27 @@ export function BottomSheet({
                 >
                   <div className="h-1.5 w-10 rounded-full bg-muted-foreground/40" />
                 </div>
-                {title || description ? (
-                  <div className="mt-2 w-full">
-                    {title ? (
-                      <h2
-                        id={titleId}
-                        className="text-base font-semibold text-foreground"
-                      >
-                        {title}
-                      </h2>
-                    ) : null}
-                    {description ? (
-                      <p
-                        id={descriptionId}
-                        className="mt-0.5 text-sm text-muted-foreground"
-                      >
-                        {description}
-                      </p>
-                    ) : null}
+                {title || description || headerAction ? (
+                  <div className="mt-2 flex w-full items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      {title ? (
+                        <h2
+                          id={titleId}
+                          className="text-base font-semibold text-foreground"
+                        >
+                          {title}
+                        </h2>
+                      ) : null}
+                      {description ? (
+                        <p
+                          id={descriptionId}
+                          className="mt-0.5 text-sm text-muted-foreground"
+                        >
+                          {description}
+                        </p>
+                      ) : null}
+                    </div>
+                    {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
                   </div>
                 ) : null}
               </div>

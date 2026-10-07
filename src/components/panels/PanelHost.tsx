@@ -7,8 +7,8 @@ import { BARS, CHORDS, LYRICS, SONG, TOTAL_BARS, chordAtBeat, lyricIndexAtBeat, 
 import { cn } from "@/lib/utils";
 
 const PANEL_META: Record<PanelId, { label: string; hint: string }> = {
-  chords: { label: "دیاگرام آکوردها", hint: "انگشتگذاری گیتار برای آکورد جاری" },
-  lyrics: { label: "متن آهنگ", hint: "همگام با پخش" },
+  chords: { label: "Chord diagrams", hint: "Guitar fingering for the current chord" },
+  lyrics: { label: "Lyrics", hint: "Synced with playback" },
 };
 
 interface PanelHostProps {
@@ -75,7 +75,7 @@ export function PanelHost(props: PanelHostProps) {
                   </div>
                   <motion.button
                     type="button"
-                    aria-label={`بستن ${PANEL_META[panel].label}`}
+                    aria-label={`Close ${PANEL_META[panel].label}`}
                     onClick={() => onClose(panel)}
                     whileTap={{ scale: 0.9 }}
                     transition={SPRING_PRESS}
@@ -147,26 +147,26 @@ function FretboardPanel({ beat, playing, semitones }: { beat: number; playing: b
     <div className="flex h-full flex-col gap-3 p-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground">{pinned ? "پیشنمایش" : "در حال پخش"}</span>
+          <span className="text-[11px] text-muted-foreground">{pinned ? "Preview" : "Playing"}</span>
           {!pinned && playing ? (
             <span className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] text-[var(--fg)]" style={{ background: "var(--fill)" }}>
-              <span className="size-1.5 animate-pulse rounded-full bg-current" /> زنده
+              <span className="size-1.5 animate-pulse rounded-full bg-current" /> Live
             </span>
           ) : null}
         </div>
         {pinned ? (
           <button type="button" onClick={() => setPinned(null)} className="text-[12px] text-[var(--fg-2)] underline decoration-dotted">
-            برگرد به پخش زنده
+            Back to live playback
           </button>
         ) : (
-          <span className="text-[12px] text-[var(--fg-3)]">بعدی: {nextChange ? transposeChordDef(CHORDS[nextChange], semitones).name : "—"}</span>
+          <span className="text-[12px] text-[var(--fg-3)]">Next: {nextChange ? transposeChordDef(CHORDS[nextChange], semitones).name : "—"}</span>
         )}
       </div>
 
       <div className="flex min-h-0 flex-1 items-center justify-center gap-4">
         <div className="shrink-0">
           <div className="mb-1 text-center text-[15px] font-semibold">{def.name}</div>
-          <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`دیاگرام آکورد ${def.name}`} dir="ltr">
+          <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Chord diagram ${def.name}`} dir="ltr">
             {baseFret > 0 ? (
               <text x={4} y={padTop + fretGap * 0.7} className="fill-[var(--muted-fg)]" fontSize="10" fontFamily="ui-monospace">
                 {baseFret + 1}
@@ -310,14 +310,6 @@ function LyricsPanel({ beat }: { beat: number }) {
                 className={cn("origin-left text-[17px] leading-snug", active ? "text-[20px] font-bold text-[var(--fg)]" : "text-[var(--fg)]")}
               >
                 {line.text}
-              </motion.p>
-              <motion.p
-                animate={{ opacity: active ? 0.85 : 0 }}
-                transition={{ duration: 0.3 }}
-                dir="rtl"
-                className="mt-1 text-[12px] text-muted-foreground"
-              >
-                {line.fa}
               </motion.p>
               {active ? (
                 <motion.span layoutId="lyric-bar" className="absolute -left-3 top-1 h-5 w-[3px] rounded-full bg-[var(--fg)]" />

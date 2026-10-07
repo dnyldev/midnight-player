@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Library } from "@/components/Library";
+import { Launcher } from "@/components/Launcher";
 import { PlayerShell } from "@/components/PlayerShell";
 import { KeySheet, MixerSheet, TempoSheet } from "@/components/Drawers";
 import type { DockId, PanelId } from "@/components/Transport";
@@ -8,10 +8,13 @@ import { useTransport } from "@/hooks/useTransport";
 
 type Theme = "night" | "day";
 
+// The app opens in the light ("day") theme. Keep this in sync with the
+// data-theme attribute in index.html — that one paints the first frame before
+// React mounts, this one is the state React hydrates with.
 export default function App() {
   const transport = useTransport();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [theme, setTheme] = useState<Theme>("night");
+  const [theme, setTheme] = useState<Theme>("day");
   const [mode, setMode] = useState<RibbonMode>("follow");
   const [panels, setPanels] = useState<PanelId[]>([]);
   const [tempoOpen, setTempoOpen] = useState(false);
@@ -115,13 +118,7 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <Library
-        playing={transport.playing}
-        sheetOpen={sheetOpen}
-        onToggle={() => void transport.toggle()}
-        onOpenPanel={openPanel}
-        onClose={() => setSheetOpen(false)}
-      />
+      <Launcher onOpen={() => openPanel("chords")} />
 
       <PlayerShell
         open={sheetOpen}
@@ -149,7 +146,6 @@ export default function App() {
         bpm={transport.bpm}
         semitones={transport.semitones}
         secPerBeat={transport.secPerBeat}
-        levels={transport.levels}
         onToggle={() => void transport.toggle()}
         onSeek={transport.seekBeat}
         onSkip={transport.skip}

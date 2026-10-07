@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ *
- *  Fonts — Vazirmatn (Persian UI) bundled locally
+ *  Fonts — Vazirmatn (the UI face) bundled locally
  * ------------------------------------------------------------------ */
 @font-face {
   font-family: "Vazirmatn";
@@ -228,8 +228,8 @@ body {
   content: "";
   position: absolute;
   top: 0;
-  right: 76px;   /* inset past the 48px tile + gap (RTL) */
-  left: 0;
+  left: 76px;    /* inset past the 48px tile + gap */
+  right: 0;
   height: 0.5px;
   background: var(--hairline);
 }
@@ -275,9 +275,6 @@ body {
 
 /* Short viewports */
 @media (max-height: 700px) {
-  .np-compact { padding: 8px 10px !important; gap: 10px !important; }
-  .np-compact .np-art { width: 42px !important; height: 42px !important; }
-  .np-compact .np-meta { display: none !important; }
   .viz-strip { display: none !important; }
 }
 
